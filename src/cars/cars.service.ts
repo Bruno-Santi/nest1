@@ -1,7 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { v4 as uuid } from 'uuid';
 import { Car } from './interfaces';
-import { CreateCarDto } from './dto/create-car.dto';
+import { CreateCarDto, UpdateCarDto } from './dto';
 
 @Injectable()
 export class CarsService {
@@ -33,5 +37,34 @@ export class CarsService {
     this.cars.push(car);
     console.log(this.cars);
     return car;
+  }
+
+  updateCar(id: string, updateCarDto: UpdateCarDto) {
+    console.log(id);
+    let carDb = this.getCarById(id);
+    if (updateCarDto.id && updateCarDto.id !== id) {
+      throw new BadRequestException(`Id cannot be changed`);
+    }
+    console.log(carDb);
+    this.cars.map((car) => {
+      if (car.id === id) {
+        carDb = {
+          ...carDb,
+          ...updateCarDto,
+          id,
+        };
+        console.log(carDb);
+        return carDb;
+      }
+      return car;
+    });
+    return carDb;
+  }
+
+  remove(id: string) {
+    this.getCarById(id);
+    const newCarList = this.cars.filter((car) => car.id !== id);
+    this.cars = newCarList;
+    return this.cars;
   }
 }
